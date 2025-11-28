@@ -300,7 +300,7 @@
 
         // Pricing Logic
         function updatePrice() {
-            const basePrice = 9.90;
+            const basePrice = 2.50;
             let total = basePrice;
             const priceEl = document.getElementById('total-price');
 
@@ -327,18 +327,17 @@
             
             if (analysis && shop && flavor) {
                 // Klient chce WSZYSTKO (Full pakiet)
-                window.location.href = 'https://buy.stripe.com/LINK_DO_FULL_PAKIETU';
+                window.location.href = 'https://buy.stripe.com/28EeVddqqeK91EKa8neIw01';
             
             } else if (analysis) {
                 // Klient chce Bazę + Analizę
-                window.location.href = 'https://buy.stripe.com/LINK_DO_BAZY_Z_ANALIZA';
+                window.location.href = 'https://buy.stripe.com/00wcN5722atT6Z40xNeIw02';
             
             } else {
-                // Domyślnie (tylko baza lub inna kombinacja, której nie obsłużyliśmy osobno)
-                // Przekierowujemy do samego planu podstawowego
-                window.location.href = 'https://buy.stripe.com/LINK_DO_PODSTAWY';
+                window.location.href = 'https://buy.stripe.com/6oU6oHbiicC14QW1BReIw00';
             }
         }
     </script>
 </body>
+
 </html>
