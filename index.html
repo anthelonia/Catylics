@@ -159,17 +159,6 @@
     </label>
 
     <label class="relative block cursor-pointer group">
-        <input type="checkbox" id="addon-flavor" class="custom-checkbox hidden" data-price="1.00" onchange="updatePrice()">
-        <div class="border-2 border-gray-100 bg-white p-6 rounded-xl shadow-sm hover:border-accent transition flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center check-icon bg-accent border-none opacity-0 transition-opacity text-white">✓</div>
-                <div><h3 class="text-lg font-bold">"Picky Eater" Option</h3><p class="text-sm text-gray-500">Exclude specific flavors (e.g., Fish).</p></div>
-            </div>
-            <div class="text-xl font-bold text-nature-dark">+ $1.00</div>
-        </div>
-    </label>
-
-    <label class="relative block cursor-pointer group">
         <input type="checkbox" id="addon-shop" class="custom-checkbox hidden" data-price="2.00" onchange="updatePrice()">
         <div class="border-2 border-gray-100 bg-white p-6 rounded-xl shadow-sm hover:border-accent transition flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -207,8 +196,28 @@
                         <!-- Summary -->
                         <div class="lg:col-span-1">
                             <div class="sticky top-24 bg-[#FFFDD0] p-8 rounded-2xl shadow-xl border border-nature-dark/10">
-                                <h3 class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-4">Total</h3>
+                                <h3 class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-2">Selected Package:</h3>
+<div id="package-name-display" class="font-bold text-nature-dark text-lg leading-tight mb-4 min-h-[3rem]">
+    Essential Nutrition Profile
+</div>
+<div class="text-gray-500 uppercase text-xs font-bold tracking-wider mb-1">Total Price</div>
                                 <div class="text-5xl font-bold text-nature-dark mb-6" id="total-price">$2.50</div>
+                                 <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-800">
+    <p class="font-semibold">🔄 Process:</p>
+    <ol class="list-decimal list-inside mt-1">
+        <li>Complete secure payment via Stripe.</li>
+        <li>You will be automatically redirected to the <strong>Cat Intake Form</strong>.</li>
+        <li>We generate your plan within 48h.</li>
+    </ol>
+</div>
+                                 <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-sm text-green-800">
+    <p class="font-semibold">🔄 How it works:</p>
+    <ol class="list-decimal list-inside mt-1 text-xs space-y-1">
+        <li>Complete secure payment.</li>
+        <li>You will be redirected to the <strong>Cat Intake Form</strong>.</li>
+        <li>Receive your PDF Plan within 48h.</li>
+    </ol>
+</div>
                                 <button onclick="goToStripe()" class="w-full bg-accent text-white font-bold py-4 rounded-lg shadow-lg hover:bg-opacity-90 transition">
     Proceed to Checkout
 </button>
@@ -319,64 +328,77 @@
             }
         }
 
-        // Pricing Logic
+        // Pricing & Naming Logic
         function updatePrice() {
             const basePrice = 2.50;
             let total = basePrice;
+            
+            const analysis = document.getElementById('addon-analysis').checked;
+            const flavor = document.getElementById('addon-flavor').checked;
+            const shop = document.getElementById('addon-shop').checked;
+
+            // Obliczanie ceny
+            if (analysis) total += 2.00;
+            if (flavor) total += 1.00;
+            if (shop) total += 2.00;
+
+            // Aktualizacja Nazwy Pakietu (Marketing)
+            let packageName = "Essential Nutrition Profile";
+            if (analysis && shop && flavor) packageName = "Total Feline Optimization™";
+            else if (analysis && shop) packageName = "Advanced Care Bundle";
+            else if (!analysis && shop && flavor) packageName = "Fussy Eater Solution";
+            else if (!analysis && shop) packageName = "Smart Shopper Plan";
+            else if (analysis) packageName = "Safety Audit Plan"; // Obejmuje samą analizę lub analizę+smak
+            else if (flavor) packageName = "Palatability Protocol";
+
+            // Aktualizacja UI
             const priceEl = document.getElementById('total-price');
-
-            const ids = ['addon-analysis', 'addon-flavor', 'addon-shop'];
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && el.checked) total += parseFloat(el.dataset.price);
-            });
-
-            // Animation
+            const nameEl = document.getElementById('package-name-display'); // Musimy dodać ten ID w HTML!
+            
+            // Animacja ceny
             priceEl.style.transform = "scale(1.1)";
             setTimeout(() => {
                 priceEl.innerText = "$" + total.toFixed(2);
                 priceEl.style.transform = "scale(1)";
+                if(nameEl) nameEl.innerText = packageName;
             }, 150);
         }
+
         function goToStripe() {
-            // Input
-            const analysis = document.getElementById('addon-analysis').checked; // Current Food Analysis
-            const flavor = document.getElementById('addon-flavor').checked;   // Picky Eater
-            const shop = document.getElementById('addon-shop').checked;     // Where to Buy
+            const analysis = document.getElementById('addon-analysis').checked;
+            const flavor = document.getElementById('addon-flavor').checked;
+            const shop = document.getElementById('addon-shop').checked;
 
-            // --- LOGIKA PRZEKIEROWAŃ ---
-
-            // 1. FULL PACKAGE ($7.50)
+            // 1. TOTAL OPTIMIZATION (All 3)
             if (analysis && shop && flavor) {
                 window.location.href = 'https://buy.stripe.com/28EeVddqqeK91EKa8neIw01';
             }
-
-            // 2. BASE + ANALYSIS + SHOP ($6.50)
-            // Warunek: Analiza i Sklep, ale BEZ Niejadka
+            // 2. ADVANCED CARE (Base + Analysis + Shop)
             else if (analysis && shop && !flavor) {
                 window.location.href = 'https://buy.stripe.com/9B600jcmm31r3MSdkzeIw03';
             }
-
-            // 3. BASE + SHOP + PICKY EATER ($5.50)
-            // Warunek: Sklep i Niejadek, ale BEZ Analizy
+            // 3. FUSSY EATER (Base + Shop + Flavor)
             else if (!analysis && shop && flavor) {
                 window.location.href = 'https://buy.stripe.com/7sYeVdbii7hHabgdkzeIw04';
             }
-
-            // 4. BASE + SHOP ($4.50)
-            // Warunek: Tylko Sklep (bez Analizy i Niejadka)
+            // 4. SMART SHOPPER (Base + Shop)
             else if (!analysis && shop && !flavor) {
                 window.location.href = 'https://buy.stripe.com/cNicN572245vfvAdkzeIw05';
             }
-
-            // 5. BASE + ANALYSIS ($4.50)
-            // Warunek: Tylko Analiza (lub Analiza + Niejadek, bo cena jest ta sama)
+            // 5. SAFETY AUDIT (Base + Analysis OR Base + Analysis + Flavor)
+            // *Uwaga: Jeśli klient wybierze Analizę + Smak (bez sklepu), sprzedajemy mu ten pakiet
             else if (analysis) {
                 window.location.href = 'https://buy.stripe.com/14A14nfyy8lL6Z41BReIw06';
             }
-
-            // 6. BASE PLAN ($2.50)
-            // Warunek: Wszystko inne (Sama Baza lub Baza + Niejadek)
+            // 6. PALATABILITY PROTOCOL (Base + Flavor)
+            // *Uwaga: Tutaj brakowało linku w Twoim kodzie. Jeśli nie masz osobnego produktu za $3.50,
+            // przekieruj do Base Plan lub stwórz nowy link w Stripe.
+            // Na razie ustawiłem domyślny Base Plan, zmień link jeśli stworzysz produkt "Palatability Protocol".
+            else if (!analysis && !shop && flavor) {
+                // ZMIEŃ TEN LINK NA WŁAŚCIWY DLA "Palatability Protocol" ($3.50) JEŚLI MASZ
+                window.location.href = 'https://buy.stripe.com/6oU6oHbiicC14QW1BReIw00'; 
+            }
+            // 7. ESSENTIAL PROFILE (Base Only)
             else {
                 window.location.href = 'https://buy.stripe.com/6oU6oHbiicC14QW1BReIw00';
             }
@@ -385,5 +407,6 @@
 </body>
 
 </html>
+
 
 
